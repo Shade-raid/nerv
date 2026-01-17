@@ -2,7 +2,7 @@ NERV Command System - Game Description
 Genre: Strategic Management / Survival / Turn-Based Strategy
 Not an idle/incremental game - This is an active turn-based strategy game where you make decisions each turn rather than passively watching numbers go up.
 
-📋 OFFICIAL DESCRIPTION
+OFFICIAL DESCRIPTION
 NERV COMMAND SYSTEM v1.0
 CLASSIFIED - CLEARANCE LEVEL 7 REQUIRED
 OPEN-SOURCE PROJECT
@@ -10,7 +10,7 @@ You are the Commander of NERV, humanity's last defense against the Angels. But t
 Command. Survive. Resist.
 Balance the impossible: Keep your Evangelion units combat-ready. Prevent your child pilots from psychological collapse. Maintain funding from a UN that doesn't trust you. And resist SEELE's creeping control over your organization—all while fighting giant monsters that could end humanity.
 
-🎮 CORE GAMEPLAY
+ CORE GAMEPLAY
 MULTI-LAYERED STRATEGY
 
 Manage 3 individual pilots with unique sync rates and mental health
@@ -42,7 +42,7 @@ UN inspections threaten autonomy
 Media scandals erupt
 
 
-🎯 KEY FEATURES
+KEY FEATURES
 ✓ Individual pilot management with mental health tracking
 ✓ Eva unit condition and damage system
 ✓ Research tree with permanent upgrades
@@ -54,17 +54,17 @@ Media scandals erupt
 ✓ No grinding—pure strategic decision-making
 ✓ 100% open-source - fork, modify, and extend freely
 
-💀 DIFFICULTY
+ DIFFICULTY
 BRUTAL AND UNFORGIVING
 This is not a power fantasy. You will make hard choices. Pilots will suffer. Resources will be scarce. SEELE will tighten their grip. The question isn't whether you'll face crisis—it's whether you can survive it without losing your soul (or your organization).
 Average survival: 15-30 days
 Good commanders: 40+ days
 Legendary runs: Defeat all 15 Angels while maintaining autonomy
 
-🎨 ATMOSPHERE
+ATMOSPHERE
 Inspired by Neon Genesis Evangelion's themes of institutional dysfunction, the crushing weight of responsibility, and the cost of using children as weapons. The retro terminal aesthetic reflects NERV's bureaucratic military nature—you're not a hero, you're middle management trying to save the world while filing budget reports.
 
-🔓 OPEN-SOURCE
+OPEN-SOURCE
 This game is completely open-source and free to use, modify, and distribute. The entire codebase is contained in a single HTML file, making it perfect for:
 
 Learning game development
