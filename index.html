@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NERV COMMAND SYSTEM</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #000;
+      color: #0f0;
+      overflow-x: hidden;
+    }
+
+    /* SPLASH SCREEN */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(180deg, #1a0033 0%, #000 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    #splash.hide { 
+      animation: fadeOut 0.8s ease forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    
+    .nerv-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 72px;
+      font-weight: 900;
+      color: #ff0000;
+      text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+      letter-spacing: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .splash-subtitle {
+      font-size: 18px;
+      color: #0f0;
+      letter-spacing: 4px;
+      margin-bottom: 40px;
+    }
+    
+    .splash-btn {
+      background: #ff0000;
+      border: 2px solid #ff0000;
+      color: #000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 15px 40px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(255,0,0,0.5);
+    }
+    
+    .splash-btn:hover {
+      background: #000;
+      color: #ff0000;
+      box-shadow: 0 0 30px rgba(255,0,0,0.8);
+    }
+
+    /* MAIN MENU */
+    #menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(180deg, #000033 0%, #000 100%);
+      padding: 40px;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    #menu.active { display: block; }
+    
+    .menu-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .menu-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      color: #ff0000;
+      text-align: center;
+      margin-bottom: 40px;
+      text-shadow: 0 0 10px #ff0000;
+    }
+    
+    .menu-options {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 60px;
+    }
+    
+    .menu-btn {
+      background: transparent;
+      border: 2px solid #0f0;
+      color: #0f0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      padding: 20px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .menu-btn:hover {
+      background: rgba(0,255,0,0.1);
+      border-color: #ff0000;
+      color: #ff0000;
+      padding-left: 30px;
+    }
+    
+    .menu-btn::before {
+      content: '>';
+      position: absolute;
+      left: 10px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .menu-btn:hover::before {
+      opacity: 1;
+    }
+
+    /* GAME SCREEN */
+    #game {
+      display: none;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      padding: 20px;
+    }
+    
+    #game.active { display: block; }
+    
+    .game-header {
+      background: #000;
+      border: 2px solid #ff0000;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(255,0,0,0.3);
+    }
+    
+    .game-header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      color: #ff0000;
+      letter-spacing: 4px;
+      text-shadow: 0 0 10px #ff0000;
+    }
+    
+    .clearance {
+      color: #0f0;
+      font-size: 12px;
+      margin-top: 5px;
+      letter-spacing: 2px;
+    }
+    
+    .container { 
+      max-width: 1400px; 
+      margin: auto; 
+    }
+    
+    .panel {
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #0f0;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(0,255,0,0.2);
+      position: relative;
+    }
+    
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #0f0, transparent);
+    }
+    
+    .panel h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #0f0;
+      font-size: 20px;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+    
+    .stat {
+      background: #001100;
+      border: 1px solid #0f0;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,0,0.1), transparent);
+      animation: scan 3s infinite;
+    }
+    
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .stat-label {
+      font-size: 11px;
+      color: #0a0;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #0f0;
+      font-weight: 700;
+    }
+    
+    .stat-value.danger { color: #ff0000; }
+    .stat-value.warning { color: #ffaa00; }
+    
+    button {
+      background: transparent;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      margin: 6px 6px 0 0;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover {
+      background: rgba(0,255,0,0.2);
+      box-shadow: 0 0 10px rgba(0,255,0,0.5);
+    }
+    
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    button.danger { 
+      border-color: #ff0000;
+      color: #ff0000;
+    }
+    
+    button.danger:hover {
+      background: rgba(255,0,0,0.2);
+      box-shadow: 0 0 10px rgba(255,0,0,0.5);
+    }
+    
+    button.secondary { 
+      border-color: #ffaa00;
+      color: #ffaa00;
+    }
+    
+    button.secondary:hover {
+      background: rgba(255,170,0,0.2);
+    }
+    
+    button.nerv { 
+      border-color: #8b00ff;
+      color: #8b00ff;
+    }
+    
+    button.nerv:hover {
+      background: rgba(139,0,255,0.2);
+      box-shadow: 0 0 10px rgba(139,0,255,0.5);
+    }
+    
+    #log {
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 13px;
+      background: #000;
+      padding: 15px;
+      border: 1px solid #0a0;
+      margin-top: 15px;
+    }
+    
+    #log p {
+      margin: 8px 0;
+      padding-left: 15px;
+      position: relative;
+      line-height: 1.6;
+    }
+    
+    #log p::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: #0a0;
+    }
+    
+    #log p.alert {
+      color: #ff0000;
+      font-weight: 700;
+    }
+    
+    #log p.alert::before {
+      content: '!!';
+      color: #ff0000;
+    }
+    
+    #log p.success {
+      color: #00ff00;
+    }
+    
+    .event-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #000;
+      border: 3px solid #ff0000;
+      padding: 30px;
+      max-width: 600px;
+      z-index: 1000;
+      box-shadow: 0 0 50px rgba(255,0,0,0.5);
+    }
+    
+    .event-modal.active { display: block; }
+    
+    .event-title {
+      font-family: 'Orbitron', sans-serif;
+      color: #ff0000;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .event-text {
+      color: #0f0;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+    
+    .event-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .turn-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #0a0;
+    }
+
+    .pilot-card {
+      background: #001100;
+      border: 1px solid #0a0;
+      padding: 12px;
+      margin: 8px 0;
+    }
+
+    .pilot-name {
+      color: #0f0;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .pilot-bar {
+      background: #002200;
+      height: 8px;
+      border: 1px solid #0a0;
+      margin-top: 5px;
+      position: relative;
+    }
+
+    .pilot-bar-fill {
+      background: #0f0;
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .pilot-bar-fill.warning { background: #ffaa00; }
+    .pilot-bar-fill.danger { background: #ff0000; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .eva-unit {
+      background: #001100;
+      border: 1px solid #8b00ff;
+      padding: 10px;
+      margin: 5px 0;
+      font-size: 12px;
+    }
+
+    .eva-status {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      color: #0a0;
+    }
+
+    .research-item {
+      background: #001a1a;
+      border-left: 3px solid #0a0;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+
+    .research-progress {
+      height: 6px;
+      background: #002200;
+      border: 1px solid #0a0;
+      margin-top: 5px;
+    }
+
+    .research-progress-fill {
+      height: 100%;
+      background: #0f0;
+      transition: width 0.3s;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #000;
+      color: #0f0;
+      text-align: center;
+      border: 1px solid #0f0;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 11px;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="nerv-logo">NERV</div>
+  <div class="splash-subtitle">SPECIAL DUTY ORGANIZATION</div>
+  <button class="splash-btn" onclick="showMenu()">INITIALIZE</button>
+</div>
+
+<!-- MAIN MENU -->
+<div id="menu">
+  <div class="menu-container">
+    <div class="menu-title">NERV COMMAND SYSTEM</div>
+    <div style="text-align: center; color: #0a0; margin-bottom: 20px;">
+      <p>CLASSIFIED - CLEARANCE LEVEL 7 REQUIRED</p>
+      <p style="margin-top: 10px; font-size: 12px;">ANTI-SEELE OPERATIONS PROTOCOL</p>
+    </div>
+    <div class="menu-options">
+      <button class="menu-btn" onclick="startGame()">
+        <strong>NEW CAMPAIGN</strong><br>
+        <span style="font-size: 13px; opacity: 0.7;">Begin operations as NERV Commander</span>
+      </button>
+      <button class="menu-btn" onclick="showBriefing()">
+        <strong>MISSION BRIEFING</strong><br>
+        <span style="font-size: 13px; opacity: 0.7;">Review operational parameters</span>
+      </button>
+      <button class="menu-btn" onclick="alert('Feature locked. Requires Magi System clearance.')">
+        <strong>LOAD SAVE</strong><br>
+        <span style="font-size: 13px; opacity: 0.7;">Resume previous deployment</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game">
+  <div class="game-header">
+    <h1>NERV COMMAND</h1>
+    <div class="clearance">CLEARANCE: LEVEL-7 // COMMANDER ACCESS GRANTED</div>
+  </div>
+  
+  <div class="container">
+    <div class="turn-info">
+      <span>OPERATIONAL DAY: <strong id="turn-display">1</strong></span>
+      <span>PATTERN: <strong id="pattern">BLUE</strong></span>
+      <span>ALERT STATUS: <strong id="alert-status">STANDBY</strong></span>
+      <span>ANGELS DEFEATED: <strong id="angels-defeated">0</strong></span>
+    </div>
+
+    <div class="panel">
+      <h2>[ SYSTEM STATUS ]</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">UN FUNDING</div>
+          <div class="stat-value" id="economy">100</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">NERV READINESS</div>
+          <div class="stat-value" id="nerv">40</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">PILOT SYNC</div>
+          <div class="stat-value" id="pilots">70</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">SEELE OVERSIGHT</div>
+          <div class="stat-value" id="seele">50</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">PUBLIC TRUST</div>
+          <div class="stat-value" id="public">60</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">MORALE</div>
+          <div class="stat-value" id="morale">65</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>[ PILOT ROSTER ]</h2>
+        <div id="pilot-roster"></div>
+      </div>
+
+      <div class="panel">
+        <h2>[ EVA UNITS ]</h2>
+        <div id="eva-units"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>[ RESEARCH & DEVELOPMENT ]</h2>
+      <div id="research-projects"></div>
+      <button class="secondary" onclick="startResearch('atfield')">AT-Field Analysis [-25 FUNDS]</button>
+      <button class="secondary" onclick="startResearch('weapons')">Weapons Development [-30 FUNDS]</button>
+      <button class="secondary" onclick="startResearch('dummy')">Dummy Plug System [-35 FUNDS]</button>
+    </div>
+
+    <div class="panel">
+      <h2>[ EVA OPERATIONS ]</h2>
+      <button class="nerv" onclick="trainPilots()">Sync Training [-10 FUNDS]</button>
+      <button class="nerv" onclick="maintainEvas()">Eva Maintenance [-15 FUNDS]</button>
+      <button class="nerv" onclick="combatDrill()">Combat Drill [-12 FUNDS]</button>
+      <button class="danger" onclick="forceSortie()">Emergency Sortie</button>
+    </div>
+
+    <div class="panel">
+      <h2>[ POLITICAL OPERATIONS ]</h2>
+      <button onclick="requestFunding()">Request UN Budget</button>
+      <button class="secondary" onclick="mediaBriefing()">Media Control [-5 FUNDS]</button>
+      <button class="secondary" onclick="investigateSEELE()">Investigate SEELE [-15 FUNDS]</button>
+      <button class="danger" onclick="seeleInterference()">Defy SEELE Orders</button>
+      <button onclick="lobbyUN()">Lobby UN Committee [-20 FUNDS]</button>
+    </div>
+    
+    <div class="panel">
+      <h2>[ PERSONNEL MANAGEMENT ]</h2>
+      <button class="nerv" onclick="counselPilots()">Pilot Counseling [-8 FUNDS]</button>
+      <button class="secondary" onclick="recruitStaff()">Recruit Personnel [-15 FUNDS]</button>
+      <button class="secondary" onclick="securitySweep()">Security Audit [-10 FUNDS]</button>
+      <button onclick="teamBuilding()">Team Building [-12 FUNDS]</button>
+    </div>
+
+    <div class="panel">
+      <h2>[ TACTICAL COMMAND ]</h2>
+      <button onclick="nextTurn()">Advance to Next Day</button>
+      <button class="secondary" onclick="viewIntel()">Intelligence Report</button>
+      <div id="log"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div id="event-modal" class="event-modal">
+  <div class="event-title" id="event-title">INCOMING TRANSMISSION</div>
+  <div class="event-text" id="event-text"></div>
+  <div class="event-choices" id="event-choices"></div>
+</div>
+
+<script>
+// GAME STATE
+let economy = 100;
+let nerv = 40;
+let pilots = 70;
+let seeleInfluence = 50;
+let publicTrust = 60;
+let morale = 65;
+let turn = 1;
+let angelsDefeated = 0;
+let pattern = 'BLUE';
+let alertStatus = 'STANDBY';
+
+// PILOT DATA
+let pilotData = [
+  { name: 'PILOT-01', sync: 70, mental: 75, eva: 'EVA-01' },
+  { name: 'PILOT-00', sync: 65, mental: 60, eva: 'EVA-00' },
+  { name: 'PILOT-02', sync: 80, mental: 70, eva: 'EVA-02' }
+];
+
+// EVA UNITS
+let evaUnits = [
+  { id: 'EVA-01', status: 'OPERATIONAL', condition: 85, power: 'Active' },
+  { id: 'EVA-00', status: 'OPERATIONAL', condition: 80, power: 'Active' },
+  { id: 'EVA-02', status: 'OPERATIONAL', condition: 90, power: 'Active' }
+];
+
+// RESEARCH
+let researchProjects = {
+  atfield: { name: 'AT-Field Analysis', progress: 0, complete: false, bonus: 'nerv' },
+  weapons: { name: 'Weapons Development', progress: 0, complete: false, bonus: 'combat' },
+  dummy: { name: 'Dummy Plug System', progress: 0, complete: false, bonus: 'autonomy' }
+};
+
+// CONSTANTS
+const COSTS = {
+  pilotTraining: 10,
+  evaMaintenance: 15,
+  combatDrill: 12,
+  counseling: 8,
+  recruitStaff: 15,
+  security: 10,
+  teamBuilding: 12,
+  mediaBriefing: 5,
+  investigation: 15,
+  lobbyUN: 20,
+  atfieldResearch: 25,
+  weaponsResearch: 30,
+  dummyResearch: 35
+};
+
+const ANGEL_NAMES = [
+  'SACHIEL', 'SHAMSHEL', 'RAMIEL', 'GAGHIEL', 'ISRAFEL',
+  'SANDALPHON', 'MATARAEL', 'SAHAQUIEL', 'IREUL', 'LELIEL',
+  'BARDIEL', 'ZERUEL', 'ARAEL', 'ARMISAEL', 'TABRIS'
+];
+
+// ENHANCED EVENTS
+const EVENTS = [
+  {
+    title: 'SEELE DEMANDS REPORT',
+    text: 'SEELE committee requests detailed operational report. Full compliance strengthens funding but increases oversight.',
+    choices: [
+      { text: 'Submit full report', effect: () => { 
+        seeleInfluence += 12; 
+        economy += 20; 
+        publicTrust += 5;
+        log('Report submitted. SEELE pleased, funding increased.'); 
+      }},
+      { text: 'Provide minimal data', effect: () => { 
+        seeleInfluence -= 8; 
+        morale += 10;
+        log('Partial compliance. Staff appreciates your defiance.'); 
+      }}
+    ]
+  },
+  {
+    title: 'PILOT PSYCHOLOGICAL CRISIS',
+    text: 'Pilot experiencing severe trauma. Medical leave restores mental health but reduces readiness.',
+    choices: [
+      { text: 'Grant medical leave', effect: () => { 
+        const pilot = pilotData[Math.floor(Math.random() * pilotData.length)];
+        pilot.mental = Math.min(100, pilot.mental + 30);
+        nerv -= 15; 
+        morale += 10;
+        log(`${pilot.name} on medical leave. Team morale improved.`); 
+      }},
+      { text: 'Force continued service', effect: () => { 
+        const pilot = pilotData[Math.floor(Math.random() * pilotData.length)];
+        pilot.mental -= 25;
+        pilot.sync += 5;
+        nerv += 10;
+        log(`${pilot.name} forced to continue. Psychological damage severe.`, 'alert'); 
+      }}
+    ]
+  },
+  {
+    title: 'UN INSPECTION INCOMING',
+    text: 'UN oversight committee arriving for facility inspection. Cooperation vs autonomy.',
+    choices: [
+      { text: 'Full cooperation', effect: () => { 
+        economy += 25; 
+        seeleInfluence += 8; 
+        publicTrust += 10;
+        log('Inspection successful. Public trust and budget approved.', 'success'); 
+      }},
+      { text: 'Restrict access', effect: () => { 
+        seeleInfluence -= 12; 
+        publicTrust -= 10;
+        morale += 15;
+        log('Inspection limited. UN suspicious, staff proud of autonomy.'); 
+      }}
+    ]
+  },
+  {
+    title: 'MAGI SYSTEM ANOMALY',
+    text: 'Unusual processing patterns detected in MAGI supercomputer.',
+    choices: [
+      { text: 'Run full diagnostics', effect: () => { 
+        economy -= 15; 
+        nerv += 10;
+        log('Diagnostics complete. System optimized, security enhanced.'); 
+      }},
+      { text: 'Ignore and monitor', effect: () => { 
+        if (Math.random() < 0.3) {
+          nerv -= 20;
+          log('Anomaly escalates! System failure detected.', 'alert');
+        } else {
+          log('Anomaly self-resolved. Ritsuko logs incident.');
+        }
+      }}
+    ]
+  },
+  {
+    title: 'CIVILIAN CASUALTIES REPORT',
+    text: 'Recent Angel engagement resulted in significant collateral damage. Media demanding answers.',
+    choices: [
+      { text: 'Public apology', effect: () => {
+        publicTrust += 15;
+        seeleInfluence += 5;
+        morale -= 10;
+        log('Commander issues public statement. Citizens appreciate transparency.');
+      }},
+      { text: 'Classify incident', effect: () => {
+        publicTrust -= 20;
+        seeleInfluence -= 5;
+        log('Incident classified. Public outrage growing.', 'alert');
+      }},
+      { text: 'Blame Angel threat', effect: () => {
+        publicTrust -= 5;
+        morale += 5;
+        log('Casualties attributed to Angel threat. Mixed public reaction.');
+      }}
+    ]
+  },
+  {
+    title: 'GENDO IKARI DISAPPEARANCE',
+    text: 'Commander Ikari has not reported for 48 hours. Location unknown.',
+    choices: [
+      { text: 'Launch search operation', effect: () => {
+        economy -= 20;
+        seeleInfluence += 10;
+        log('Search teams deployed. SEELE questions chain of command.');
+      }},
+      { text: 'Assume command temporarily', effect: () => {
+        morale += 15;
+        seeleInfluence -= 10;
+        log('You assume direct command. Staff confidence increases.');
+      }}
+    ]
+  },
+  {
+    title: 'BUDGETCONGRESSIONAL HEARING',
+    text: 'NERV budget under review. Congressional committee questioning expenditures.',
+    choices: [
+      { text: 'Present detailed accounting', effect: () => {
+        economy += 30;
+        publicTrust += 10;
+        log('Transparent accounting wins congressional approval.', 'success');
+      }},
+      { text: 'Invoke national security', effect: () => {
+        economy += 10;
+        publicTrust -= 15;
+        seeleInfluence += 5;
+        log('Budget approved under classified protocols. Public skeptical.');
+      }}
+    ]
+  }
+];
+
+// UI ELEMENTS
+const economyEl = document.getElementById('economy');
+const nervEl = document.getElementById('nerv');
+const pilotsEl = document.getElementById('pilots');
+const seeleEl = document.getElementById('seele');
+const publicEl = document.getElementById('public');
+const moraleEl = document.getElementById('morale');
+const logEl = document.getElementById('log');
+const turnDisplay = document.getElementById('turn-display');
+const patternDisplay = document.getElementById('pattern');
+const alertDisplay = document.getElementById('alert-status');
+const angelsDefeatedEl = document.getElementById('angels-defeated');
+
+// MENU FUNCTIONS
+function showMenu() {
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('menu').classList.add('active');
+  }, 800);
+}
+
+function showBriefing() {
+  alert('MISSION BRIEFING:\n\nYou command NERV, humanity\'s defense against the Angels. Balance combat readiness, pilot welfare, funding, and SEELE\'s shadowy agenda.\n\nMANAGE:\n- Eva units and pilot synchronization\n- Research and development\n- Political relationships\n- Public trust and morale\n\nVICTORY: Survive while maintaining autonomy\nDEFEAT: Pilot collapse, SEELE takeover, or NERV destruction\n\nRemember: SEELE has their own plans for humanity.');
+}
+
+function startGame() {
+  document.getElementById('menu').classList.remove('active');
+  document.getElementById('game').classList.add('active');
+  log('NERV COMMAND SYSTEM ONLINE');
+  log('ANGEL ATTACK PROBABILITY: HIGH');
+  log('SEELE OVERSIGHT: ACTIVE');
+  log('PATTERN BLUE - ALL SYSTEMS NOMINAL');
+  updateUI();
+  updatePilotRoster();
+  updateEvaUnits();
+  updateResearch();
+}
+
+// UI UPDATE
+function updateUI() {
+  economyEl.textContent = economy;
+  nervEl.textContent = nerv;
+  pilotsEl.textContent = Math.floor(pilotData.reduce((sum, p) => sum + p.sync, 0) / pilotData.length);
+  seeleEl.textContent = seeleInfluence;
+  publicEl.textContent = publicTrust;
+  moraleEl.textContent = morale;
+  turnDisplay.textContent = turn;
+  patternDisplay.textContent = pattern;
+  alertDisplay.textContent = alertStatus;
+  angelsDefeatedEl.textContent = angelsDefeated;
+  
+  // Color coding
+  economyEl.className = economy < 30 ? 'stat-value danger' : economy < 60 ? 'stat-value warning' : 'stat-value';
+  nervEl.className = nerv < 30 ? 'stat-value danger' : nerv < 60 ? 'stat-value warning' : 'stat-value';
+  pilotsEl.className = pilots < 30 ? 'stat-value danger' : pilots < 60 ? 'stat-value warning' : 'stat-value';
+  seeleEl.className = seeleInfluence > 70 ? 'stat-value danger' : seeleInfluence > 50 ? 'stat-value warning' : 'stat-value';
+  publicEl.className = publicTrust < 30 ? 'stat-value danger' : publicTrust < 50 ? 'stat-value warning' : 'stat-value';
+  moraleEl.className = morale < 30 ? 'stat-value danger' : morale < 50 ? 'stat-value warning' : 'stat-value';
+}
+
+function updatePilotRoster() {
+  const roster = document.getElementById('pilot-roster');
+  roster.innerHTML = '';
+  
+  pilotData.forEach(pilot => {
+    const card = document.createElement('div');
+    card.className = 'pilot-card';
+    
+    const syncClass = pilot.sync < 40 ? 'danger' : pilot.sync < 60 ? 'warning' : '';
+    const mentalClass = pilot.mental < 40 ? 'danger' : pilot.mental < 60 ? 'warning' : '';
+    
+    card.innerHTML = `
+      <div class="pilot-name">${pilot.name} - ${pilot.eva}</div>
+      <div style="font-size: 11px; color: #0a0;">
+        SYNC: ${pilot.sync}% | MENTAL: ${pilot.mental}%
+      </div>
+      <div class="pilot-bar">
+        <div class="pilot-bar-fill ${syncClass}" style="width: ${pilot.sync}%"></div>
+      </div>
+    `;
+    roster.appendChild(card);
+  });
+}
+
+function updateEvaUnits() {
+  const units = document.getElementById('eva-units');
+  units.innerHTML = '';
+  
+  evaUnits.forEach(eva => {
+    const card = document.createElement('div');
+    card.className = 'eva-unit';
+    
+    const condClass = eva.condition < 40 ? 'danger' : eva.condition < 70 ? 'warning' : '';
+    
+    card.innerHTML = `
+      <div style="color: #8b00ff; font-weight: bold;">${eva.id}</div>
+      <div class="eva-status">
+        <span>STATUS: ${eva.status}</span>
+        <span>CONDITION: ${eva.condition}%</span>
+      </div>
+      <div class="pilot-bar">
+        <div class="pilot-bar-fill ${condClass}" style="width: ${eva.condition}%"></div>
+      </div>
+    `;
+    units.appendChild(card);
+  });
+}
+
+function updateResearch() {
+  const research = document.getElementById('research-projects');
+  research.innerHTML = '';
+  
+  for (let key in researchProjects) {
+    const proj = researchProjects[key];
+    const item = document.createElement('div');
+    item.className = 'research-item';
+    
+    const status = proj.complete ? '[COMPLETE]' : `[${proj.progress}%]`;
+    
+    item.innerHTML = `
+      <div style="display: flex; justify-content: space-between;">
+        <span>${proj.name}</span>
+        <span style="color: ${proj.complete ? '#0f0' : '#ffaa00'};">${status}</span>
+      </div>
+      ${!proj.complete ? `<div class="research-progress"><div class="research-progress-fill" style="width: ${proj.progress}%"></div></div>` : ''}
+    `;
+    research.appendChild(item);
+  }
+}
+
+function log(msg, type = 'normal') {
+  const p = document.createElement('p');
+  p.textContent = msg;
+  if (type === 'alert') p.classList.add('alert');
+  if (type === 'success') p.classList.add('success');
+  logEl.prepend(p);
+  if (logEl.children.length > 50) logEl.removeChild(logEl.lastChild);
+}
+
+// RESEARCH SYSTEM
+function startResearch(type) {
+  const costs = { atfield: 25, weapons: 30, dummy: 35 };
+  if (economy < costs[type]) {
+    log('INSUFFICIENT FUNDS FOR RESEARCH', 'alert');
+    return;
+  }
+  
+  if (researchProjects[type].complete) {
+    log('RESEARCH ALREADY COMPLETE', 'alert');
+    return;
+  }
+  
+  economy -= costs[type];
+  researchProjects[type].progress = Math.min(100, researchProjects[type].progress + 33);
+  
+  if (researchProjects[type].progress >= 100) {
+    researchProjects[type].complete = true;
+    log(`${researchProjects[type].name} COMPLETE`, 'success');
+    
+    // Apply bonuses
+    if (type === 'atfield') nerv += 20;
+    if (type === 'weapons') nerv += 25;
+    if (type === 'dummy') {
+      nerv += 15;
+      seeleInfluence += 10;
+    }
+  } else {
+    log(`${researchProjects[type].name} progress: ${researchProjects[type].progress}%`);
+  }
+  
+  updateResearch();
+  updateUI();
+}
+
+// EVA OPERATIONS
+function trainPilots() {
+  if (economy < COSTS.pilotTraining) {
+    log('INSUFFICIENT FUNDS FOR TRAINING', 'alert');
+    return;
+  }
+  economy -= COSTS.pilotTraining;
+  
+  pilotData.forEach(pilot => {
+    pilot.sync = Math.min(100, pilot.sync + Math.floor(Math.random() * 8) + 5);
+  });
+  
+  nerv += 5;
+  morale += 5;
+  log('Sync training completed. Pilot harmony rates improved.');
+  updatePilotRoster();
+  updateUI();
+}
+
+function maintainEvas() {
+  if (economy < COSTS.evaMaintenance) {
+    log('INSUFFICIENT FUNDS FOR MAINTENANCE', 'alert');
+    return;
+  }
+  economy -= COSTS.evaMaintenance;
+  
+  evaUnits.forEach(eva => {
+    eva.condition = Math.min(100, eva.condition + 15);
+    if (eva.status === 'DAMAGED') eva.status = 'OPERATIONAL';
+  });
+  
+  nerv += 18;
+  log('Eva units serviced. Armor repaired, weapons systems calibrated.', 'success');
+  updateEvaUnits();
+  updateUI();
+}
+
+function combatDrill() {
+  if (economy < COSTS.combatDrill) {
+    log('INSUFFICIENT FUNDS FOR DRILL', 'alert');
+    return;
+  }
+  economy -= COSTS.combatDrill;
+  
+  pilotData.forEach(pilot => {
+    pilot.sync += Math.floor(Math.random() * 5) + 2;
+    pilot.mental -= Math.floor(Math.random() * 5);
+  });
+  
+  nerv += 12;
+  log('Combat drill executed. Tactical coordination improved.');
+  updatePilotRoster();
+  updateUI();
+}
+
+function forceSortie() {
+  nerv -= 8;
+  
+  pilotData.forEach(pilot => {
+    pilot.mental -= Math.floor(Math.random() * 15) + 10;
+    pilot.sync += Math.floor(Math.random() * 5);
+  });
+  
+  evaUnits.forEach(eva => {
+    eva.condition -= Math.floor(Math.random() * 20) + 10;
+  });
+  
+  morale -= 15;
+  log('EMERGENCY SORTIE EXECUTED. Target eliminated. Heavy toll on pilots.', 'alert');
+  updatePilotRoster();
+  updateEvaUnits();
+  updateUI();
+}
+
+// POLITICAL OPERATIONS
+function requestFunding() {
+  const successChance = 0.7 - (seeleInfluence * 0.003) + (publicTrust * 0.002);
+  const success = Math.random() < successChance;
+  
+  if (success) {
+    const amount = 20 + Math.floor(Math.random() * 15);
+    economy += amount;
+    seeleInfluence += 6;
+    log(`UN budget approved: +${amount}. SEELE oversight increases.`);
+  } else {
+    publicTrust -= 5;
+    log('Budget request DENIED. UN committee cites operational concerns.', 'alert');
+  }
+  updateUI();
+}
+
+function mediaBriefing() {
+  if (economy < COSTS.mediaBriefing) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.mediaBriefing;
+  seeleInfluence -= 6;
+  publicTrust += 15;
+  morale += 5;
+  log('Press conference held. Public support for NERV strengthened.');
+  updateUI();
+}
+
+function investigateSEELE() {
+  if (economy < COSTS.investigation) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.investigation;
+  seeleInfluence -= 12;
+  morale += 10;
+  log('Covert investigation initiated. SEELE financial ties uncovered.', 'success');
+  log('WARNING: SEELE aware of surveillance', 'alert');
+  updateUI();
+}
+
+function seeleInterference() {
+  seeleInfluence -= 18;
+  nerv -= 12;
+  economy -= 10;
+  morale += 20;
+  publicTrust += 10;
+  log('SEELE DIRECTIVE REJECTED. Direct confrontation initiated.', 'alert');
+  log('Supply chains disrupted. Staff morale soars.');
+  updateUI();
+}
+
+function lobbyUN() {
+  if (economy < COSTS.lobbyUN) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.lobbyUN;
+  publicTrust += 12;
+  seeleInfluence -= 8;
+  log('UN lobbying successful. International support growing.');
+  updateUI();
+}
+
+// PERSONNEL MANAGEMENT
+function counselPilots() {
+  if (economy < COSTS.counseling) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.counseling;
+  
+  pilotData.forEach(pilot => {
+    pilot.mental = Math.min(100, pilot.mental + Math.floor(Math.random() * 12) + 8);
+  });
+  
+  morale += 10;
+  log('Psychological counseling session. Pilot mental states stabilizing.');
+  updatePilotRoster();
+  updateUI();
+}
+
+function recruitStaff() {
+  if (economy < COSTS.recruitStaff) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.recruitStaff;
+  nerv += 8;
+  morale += 5;
+  log('New personnel recruited. Technical staff expanded.');
+  updateUI();
+}
+
+function securitySweep() {
+  if (economy < COSTS.security) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.security;
+  
+  const spyFound = Math.random() < 0.35;
+  if (spyFound) {
+    seeleInfluence -= 15;
+    morale += 10;
+    log('SEELE OPERATIVE DISCOVERED AND REMOVED', 'success');
+  } else {
+    log('Security audit complete. No breaches detected.');
+  }
+  updateUI();
+}
+
+function teamBuilding() {
+  if (economy < COSTS.teamBuilding) {
+    log('INSUFFICIENT FUNDS', 'alert');
+    return;
+  }
+  economy -= COSTS.teamBuilding;
+  morale += 15;
+  
+  pilotData.forEach(pilot => {
+    pilot.mental += 5;
+  });
+  
+  log('Team building exercises conducted. Staff cohesion improved.');
+  updatePilotRoster();
+  updateUI();
+}
+
+function viewIntel() {
+  const intel = `
+INTELLIGENCE BRIEFING - DAY ${turn}
+
+THREAT ASSESSMENT:
+- Angels Neutralized: ${angelsDefeated}
+- Next Attack Probability: ${Math.floor(Math.random() * 30) + 40}%
+- SEELE Activity Level: ${seeleInfluence > 70 ? 'CRITICAL' : seeleInfluence > 50 ? 'HIGH' : 'MODERATE'}
+
+PILOT STATUS:
+${pilotData.map(p => `${p.name}: Sync ${p.sync}%, Mental ${p.mental}%`).join('\n')}
+
+EVA READINESS:
+${evaUnits.map(e => `${e.id}: ${e.status} (${e.condition}%)`).join('\n')}
+
+RECOMMENDATION: ${
+  morale < 40 ? 'Focus on staff morale' :
+  nerv < 40 ? 'Prioritize combat readiness' :
+  seeleInfluence > 70 ? 'Counter SEELE influence urgently' :
+  'Maintain current operational tempo'
+}
+  `;
+  alert(intel);
+}
+
+// EVENTS
+function triggerEvent() {
+  const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  const modal = document.getElementById('event-modal');
+  document.getElementById('event-title').textContent = event.title;
+  document.getElementById('event-text').textContent = event.text;
+  
+  const choicesDiv = document.getElementById('event-choices');
+  choicesDiv.innerHTML = '';
+  
+  event.choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.textContent = choice.text;
+    btn.onclick = () => {
+      choice.effect();
+      modal.classList.remove('active');
+      updateUI();
+      updatePilotRoster();
+      updateEvaUnits();
+    };
+    choicesDiv.appendChild(btn);
+  });
+  
+  modal.classList.add('active');
+}
+
+// TURN SYSTEM
+function nextTurn() {
+  turn++;
+  economy = Math.min(200, economy + 12);
+  
+  // Natural degradation
+  pilotData.forEach(pilot => {
+    pilot.mental = Math.max(0, pilot.mental - Math.floor(Math.random() * 4) - 1);
+  });
+  
+  evaUnits.forEach(eva => {
+    eva.condition = Math.max(0, eva.condition - 2);
+  });
+  
+  seeleInfluence = Math.min(100, seeleInfluence + 2);
+  morale = Math.max(0, morale - 2);
+  
+  // Research progress
+  for (let key in researchProjects) {
+    if (!researchProjects[key].complete && researchProjects[key].progress > 0 && researchProjects[key].progress < 100) {
+      researchProjects[key].progress = Math.min(100, researchProjects[key].progress + 5);
+      if (researchProjects[key].progress >= 100) {
+        researchProjects[key].complete = true;
+        log(`${researchProjects[key].name} RESEARCH COMPLETE`, 'success');
+      }
+    }
+  }
+  
+  // Random events
+  if (Math.random() < 0.30) triggerEvent();
+  
+  // Angel attacks
+  if (Math.random() < 0.50) {
+    angelAttack();
+  } else {
+    pattern = 'BLUE';
+    alertStatus = 'STANDBY';
+  }
+  
+  checkGameState();
+  log(`--- DAY ${turn} COMPLETE ---`);
+  updateUI();
+  updatePilotRoster();
+  updateEvaUnits();
+  updateResearch();
+}
+
+function angelAttack() {
+  const angelName = ANGEL_NAMES[angelsDefeated % ANGEL_NAMES.length];
+  pattern = 'ORANGE';
+  alertStatus = 'COMBAT';
+  
+  log(`PATTERN ORANGE DETECTED - ANGEL ${angelName} APPROACHING`, 'alert');
+  log('ALL PERSONNEL TO BATTLE STATIONS', 'alert');
+  
+  const avgSync = pilotData.reduce((sum, p) => sum + p.sync, 0) / pilotData.length;
+  const avgCondition = evaUnits.reduce((sum, e) => sum + e.condition, 0) / evaUnits.length;
+  const combatPower = nerv + (avgSync * 0.6) + (avgCondition * 0.4);
+  const difficulty = 75 + (angelsDefeated * 6) + Math.floor(Math.random() * 15);
+  
+  if (combatPower >= difficulty) {
+    // Victory
+    pilotData.forEach(pilot => {
+      pilot.mental -= Math.floor(Math.random() * 12) + 5;
+      pilot.sync += Math.floor(Math.random() * 3);
+    });
+    
+    evaUnits.forEach(eva => {
+      eva.condition -= Math.floor(Math.random() * 15) + 8;
+    });
+    
+    nerv -= Math.floor(Math.random() * 12) + 5;
+    publicTrust += 15;
+    morale += 10;
+    angelsDefeated++;
+    
+    log(`ANGEL ${angelName} NEUTRALIZED. Minimal casualties.`, 'success');
+    log(`Angels defeated: ${angelsDefeated}`);
+  } else {
+    // Defeat/Pyrrhic victory
+    pilotData.forEach(pilot => {
+      pilot.mental -= Math.floor(Math.random() * 25) + 15;
+      pilot.sync -= Math.floor(Math.random() * 10);
+    });
+    
+    evaUnits.forEach(eva => {
+      eva.condition -= Math.floor(Math.random() * 30) + 20;
+      if (eva.condition < 40) eva.status = 'DAMAGED';
+    });
+    
+    nerv -= 25;
+    economy -= 20;
+    publicTrust -= 20;
+    seeleInfluence += 15;
+    morale -= 20;
+    
+    log(`CRITICAL DAMAGE SUSTAINED. Angel barely repelled.`, 'alert');
+    log('Civilian casualties high. SEELE demands immediate review.');
+  }
+  
+  pattern = 'YELLOW';
+  alertStatus = 'RECOVERY';
+}
+
+function checkGameState() {
+  const avgMental = pilotData.reduce((sum, p) => sum + p.mental, 0) / pilotData.length;
+  
+  if (avgMental <= 10) {
+    log('TOTAL PILOT INCAPACITATION', 'alert');
+    setTimeout(() => {
+      alert(`MISSION FAILURE\n\nAll pilots psychologically destroyed. NERV combat operations terminated.\n\nDays Survived: ${turn}\nAngels Defeated: ${angelsDefeated}\n\nHumanity has no defense.`);
+      location.reload();
+    }, 500);
+  }
+  if (seeleInfluence >= 100) {
+    log('SEELE ASSUMES DIRECT CONTROL', 'alert');
+    setTimeout(() => {
+      alert(`MISSION FAILURE\n\nSEELE has taken complete control of NERV.\n\nDays Survived: ${turn}\nAngels Defeated: ${angelsDefeated}\n\nThe Human Instrumentality Project begins.`);
+      location.reload();
+    }, 500);
+  }
+  if (nerv <= 0) {
+    log('NERV COMBAT CAPABILITY: ZERO', 'alert');
+    setTimeout(() => {
+      alert(`MISSION FAILURE\n\nNERV is no longer combat-ready.\n\nDays Survived: ${turn}\nAngels Defeated: ${angelsDefeated}\n\nAngel threat remains. Humanity is defenseless.`);
+      location.reload();
+    }, 500);
+  }
+  if (economy <= 0) {
+    log('BUDGET DEPLETED', 'alert');
+    setTimeout(() => {
+      alert(`MISSION FAILURE\n\nNERV operations cannot continue without funding.\n\nDays Survived: ${turn}\nAngels Defeated: ${angelsDefeated}\n\nOrganization dissolved by UN resolution.`);
+      location.reload();
+    }, 500);
+  }
+  if (publicTrust <= 0) {
+    log('PUBLIC SUPPORT COLLAPSED', 'alert');
+    setTimeout(() => {
+      alert(`MISSION FAILURE\n\nCivilian population has lost all faith in NERV.\n\nDays Survived: ${turn}\nAngels Defeated: ${angelsDefeated}\n\nUN votes to disband organization.`);
+      location.reload();
+    }, 500);
+  }
+}
+</script>
+</body>
+</html>
